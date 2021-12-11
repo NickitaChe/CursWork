@@ -13,7 +13,6 @@ using System.Text.RegularExpressions;
 
 namespace DB
 {
-    
     public partial class Form1 : Form
     {
         private SqlConnection sqlConnection = null;
@@ -28,11 +27,9 @@ namespace DB
         private void Form1_Load(object sender, EventArgs e)
         {
             sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["DBKey"].ConnectionString);
-
             sqlConnection.Open();
 
             nrtwindConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["Northwind"].ConnectionString);
-
             nrtwindConnection.Open();
             
 
@@ -66,8 +63,6 @@ namespace DB
                     checkedListBox1.Items.Add(columList[i]);
                 }
             }
-
-
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -123,8 +118,6 @@ namespace DB
                 chekboxStr = chekboxStr.Remove(chekboxStr.Length - 1);
                 chekboxStr = chekboxStr.Remove(chekboxStr.Length - 1);
             }
-            
-
 
             if (listBox1.SelectedItem != null && listBox2.SelectedItem != null && checkedListBox1.SelectedItems != null)
             {
@@ -199,19 +192,15 @@ namespace DB
             }
 
         }
-
         private void button4_Click(object sender, EventArgs e)
         {
             Login.TabPages.RemoveAt(0);
             Login.TabPages.Add(tabPage4);
         }
-
         private void button5_Click(object sender, EventArgs e)
         {
-
             if (textBox14.Text != null && textBox17.Text != null)
             {
-
                 SqlCommand command1 = new SqlCommand(
                 $"SELECT COUNT(*) FROM LoginBase WHERE Login = N'{textBox14.Text}'",
                 nrtwindConnection);
@@ -247,13 +236,10 @@ namespace DB
         private void Login_Selected(object sender, TabControlEventArgs e)
         {
             Update_Gird(dataGridView2);
-
-
         }
 
         private void Update_Gird(DataGridView dataGrid, string strSQL = "SELECT Login, Password FROM LoginBase")
         {
-
             SqlDataAdapter dataAdapter = new SqlDataAdapter(
             strSQL,
             nrtwindConnection);
@@ -268,6 +254,11 @@ namespace DB
         {
             Login.TabPages.RemoveAt(0);
             Login.TabPages.Add(tabPage3);
+        }
+
+        private void textBox6_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
