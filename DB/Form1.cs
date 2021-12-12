@@ -67,20 +67,11 @@ namespace DB
 
         private void button1_Click(object sender, EventArgs e)
         {
-            SqlCommand command = new SqlCommand(
+           /* SqlCommand command = new SqlCommand(
                 $"INSERT INTO [Students] (Name, Surname, BirthDay, BurnState, Phone, EMail) VALUES(@Name, @Surname, @BirthDay, @BurnState, @Phone, @EMail)",
                 sqlConnection);
-            DateTime date = DateTime.Parse(textBox3.Text);
 
-
-            command.Parameters.AddWithValue("Name", textBox1.Text);
-            command.Parameters.AddWithValue("Surname", textBox2.Text);
-            command.Parameters.AddWithValue("BirthDay", $"{date.Month}/{date.Day}/{date.Year}");
-            command.Parameters.AddWithValue("BurnState", textBox4.Text);
-            command.Parameters.AddWithValue("Phone", textBox5.Text);
-            command.Parameters.AddWithValue("EMail", textBox6.Text);
-
-            MessageBox.Show(command.ExecuteNonQuery().ToString());
+            MessageBox.Show(command.ExecuteNonQuery().ToString()); */
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -199,22 +190,22 @@ namespace DB
         }
         private void button5_Click(object sender, EventArgs e)
         {
-            if (textBox14.Text != null && textBox17.Text != null)
+            if (textBox14.Text != null && textBox17.Text != null && textBox25.Text != null && textBox4.Text != null)
             {
                 SqlCommand command1 = new SqlCommand(
-                $"SELECT COUNT(*) FROM LoginBase WHERE Login = N'{textBox14.Text}'",
-                nrtwindConnection);
+                $"SELECT COUNT(*) FROM Sellers WHERE Login = N'{textBox14.Text}'",
+                sqlConnection);
 
                 if (Int32.Parse(command1.ExecuteScalar().ToString()) == 0)
                 {
                     SqlCommand command = new SqlCommand(
-                    $"INSERT INTO [LoginBase] (Login, Password) VALUES(N'{textBox14.Text}', N'{textBox17.Text}')",
-                    nrtwindConnection);
+                    $"INSERT INTO [Sellers] (Name, Surname, Telnum, Email, Commision, Login, Password) VALUES(N'{textBox25.Text}', N'{textBox4.Text}', N'{textBox29.Text}', N'{textBox26.Text}', 0.15, N'{textBox14.Text}', N'{textBox17.Text}')",
+                    sqlConnection);
 
                     Login.TabPages.RemoveAt(0);
                     Login.TabPages.Add(tabPage3);
                     command.ExecuteNonQuery();
-                    Update_Gird(dataGridView2);
+                    update_Gird(dataGridView2, nrtwindConnection);
                     MessageBox.Show("Успешная Регистрация");
                 }
                 else
@@ -235,14 +226,14 @@ namespace DB
 
         private void Login_Selected(object sender, TabControlEventArgs e)
         {
-            Update_Gird(dataGridView2);
+            update_Gird(dataGridView2, nrtwindConnection);
         }
 
-        private void Update_Gird(DataGridView dataGrid, string strSQL = "SELECT Login, Password FROM LoginBase")
+        private void update_Gird(DataGridView dataGrid, SqlConnection sqlSource, string strSQL = "SELECT Login, Password FROM LoginBase")
         {
             SqlDataAdapter dataAdapter = new SqlDataAdapter(
             strSQL,
-            nrtwindConnection);
+            sqlSource);
             DataSet dataSet = new DataSet();
             dataAdapter.Fill(dataSet);
 
@@ -260,5 +251,27 @@ namespace DB
         {
 
         }
+
+        private void textBox18_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            update_Gird(dataGridView3, sqlConnection, $"SELECT Unit_name, SELL_Price, ID FROM Units WHERE Unit_name LIKE N'%{textBox1.Text}%'");
+
+        }
+
+        private void textBox31_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
+
