@@ -1,1 +1,0 @@
-﻿INSERT INTO Students (Name)
