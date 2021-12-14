@@ -32,7 +32,10 @@ namespace DB
 
             nrtwindConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["Northwind"].ConnectionString);
             nrtwindConnection.Open();
-            
+
+
+
+
 
             columList.Add("ProductID");
             //columList.Add("ProductName");
@@ -45,8 +48,8 @@ namespace DB
             columList.Add("ReorderLevel");
             columList.Add("Discontinued");
 
-            listBox1.Items.Clear();
-            checkedListBox1.Items.Clear();
+            //listBox1.Items.Clear();
+           // checkedListBox1.Items.Clear();
 
             //Создание и удаление tabPage
             Login.TabPages.Clear();
@@ -60,8 +63,8 @@ namespace DB
             {
                 if (columList[i] != null)
                 {
-                    listBox1.Items.Add(columList[i]);
-                    checkedListBox1.Items.Add(columList[i]);
+                    //listBox1.Items.Add(columList[i]);
+                    //checkedListBox1.Items.Add(columList[i]);
                 }
             }
         }
@@ -79,7 +82,7 @@ namespace DB
 
 
         }
-
+        /*
         private void button2_Click_1(object sender, EventArgs e)
         {
             //Обработка строки
@@ -114,7 +117,7 @@ namespace DB
             {
                 //{checkedListBox1.SelectedItems.ToString()}
                 SqlDataAdapter dataAdapter = new SqlDataAdapter(
-                /*SELECT  Выбранные столбики                          Столбец                          Знак { >, <, = }         Значение*/
+                /*SELECT  Выбранные столбики                          Столбец                          Знак { >, <, = }         Значение*//*
                 $"SELECT {chekboxStr} FROM Products WHERE {listBox1.SelectedItem.ToString()} {listBox2.SelectedItem.ToString()} {box7str}",
                 nrtwindConnection);
                 
@@ -128,7 +131,7 @@ namespace DB
             {
                 MessageBox.Show("Не выбран Элемент");
             }
-        }
+        }*/
 
         private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e)
         {
@@ -172,10 +175,46 @@ namespace DB
                 {
                     Login.TabPages.RemoveAt(0);
                     Login.TabPages.Add(tabPage1);
-                    Login.TabPages.Add(tabPage2);
+                    //Login.TabPages.Add(tabPage2);
                     Login.TabPages.Add(tabPage5);
                     Login.TabPages.Add(tabPage8);
+                    Login.TabPages.Add(tabPage9);
                     update_Gird(dataGridView6, sqlConnection, "SELECT * FROM Units");
+                    
+                    update_Gird(dataGridView10, sqlConnection, "SELECT * FROM( SELECT  u.Unit_name AS 'Наименование', SUM(sc.Quantity * (u.SELL_Price - u.BUY_Price)) AS 'Доход' FROM Units u, SellChek sc WHERE sc.Unit_Id = u.ID GROUP BY u.Unit_name) b");
+                    update_Gird(dataGridView11, sqlConnection, "SELECT u.Unit_name AS 'Наименование', u.Quantity AS 'Количество'  FROM Units u WHERE u.Quantity < 100");
+                    update_Gird(dataGridView8, sqlConnection, "SELECT sc.Date, SUM(sc.Quantity*(u.SELL_Price-u.BUY_Price)) AS 'Доход' FROM SellChek sc LEFT JOIN Units u ON sc.Unit_Id =u.ID	GROUP BY sc.Date");
+                    update_Gird(dataGridView9, sqlConnection, "SELECT DATENAME(m, sc.Date)+DATENAME(yy, sc.Date) , SUM(sc.Quantity * (u.SELL_Price - u.BUY_Price)) AS 'Доход' FROM SellChek sc LEFT JOIN Units u ON sc.Unit_Id = u.ID GROUP BY  DATENAME(m, sc.Date) + DATENAME(yy, sc.Date)");
+                    update_Gird(dataGridView7, sqlConnection, $"SELECT s.Name AS 'Имя', s.Surname AS 'Фамилия', SUM(s.Commision*sc.Quantity*(u.SELL_Price-u.BUY_Price)) AS 'Зарплата' FROM Sellers s JOIN SellChek sc ON s.ID = sc.Seller_Id JOIN Units u	ON sc.Unit_Id = u.ID WHERE DATEPART(m, sc.date) = DATEPART(m, N'{splitDatetoSql(dateTimePicker2.Value.ToString())}') AND DATEPART(yy, sc.date) = DATEPART(yy, N'{splitDatetoSql(dateTimePicker2.Value.ToString())}') GROUP BY s.Name,s.Surname");
+
+                    command = new SqlCommand(
+                    $"SELECT TOP(1) s.Name+s.Surname AS 'имя', SUM(s.Commision * sc.Quantity * (u.SELL_Price - u.BUY_Price)) AS 'Зарплата' FROM Sellers s JOIN SellChek sc ON s.ID = sc.Seller_Id JOIN Units u ON sc.Unit_Id = u.ID GROUP BY s.Name,s.Surname",
+                    sqlConnection);
+
+                    string TopMNGR = command.ExecuteScalar().ToString();
+
+                    string[] B = TopMNGR.Split();
+
+                    command = new SqlCommand(
+                    $"SELECT TOP(1) s.Surname AS 'имя', SUM(s.Commision * sc.Quantity * (u.SELL_Price - u.BUY_Price)) AS 'Зарплата' FROM Sellers s JOIN SellChek sc ON s.ID = sc.Seller_Id JOIN Units u ON sc.Unit_Id = u.ID GROUP BY s.Name,s.Surname",
+                    sqlConnection);
+
+                    B[1] = command.ExecuteScalar().ToString();
+
+                    textBox53.Text = B[0]+" "+B[1];
+
+
+
+
+                    command = new SqlCommand(
+                    $"SELECT TOP(1) DATENAME(m, sc.Date)+DATENAME(yy, sc.Date) , SUM(sc.Quantity * (u.SELL_Price - u.BUY_Price)) AS 'Доход' FROM SellChek sc LEFT JOIN Units u ON sc.Unit_Id = u.ID GROUP BY  DATENAME(m, sc.Date) + DATENAME(yy, sc.Date)",
+                    sqlConnection);
+                    textBox56.Text = command.ExecuteScalar().ToString();
+
+                    command = new SqlCommand(
+                    $"SELECT TOP(1) sc.Date, SUM(sc.Quantity*(u.SELL_Price-u.BUY_Price)) AS 'Доход' FROM SellChek sc LEFT JOIN Units u ON sc.Unit_Id =u.ID	GROUP BY sc.Date  ORDER BY ~SUM(sc.Quantity*(u.SELL_Price-u.BUY_Price))",
+                    sqlConnection);
+                    textBox54.Text = command.ExecuteScalar().ToString();
 
                     command = new SqlCommand(
                     $"SELECT Name FROM Sellers WHERE Login = N'{textBox9.Text}' AND Password = N'{textBox10.Text}'",
@@ -183,16 +222,18 @@ namespace DB
 
                     string UserRealName = command.ExecuteScalar().ToString();
 
+                    string[] A = UserRealName.Split();
+
                     command = new SqlCommand(
                     $"SELECT  Surname FROM Sellers WHERE Login = N'{textBox9.Text}' AND Password = N'{textBox10.Text}'",
                     sqlConnection);
-
-                    UserRealName += command.ExecuteScalar().ToString();
+                    A[0] += " ";
+                    A[0] += command.ExecuteScalar().ToString();
 
                     GetSellCount();
 
                     
-                    textBox32.Text = $"Logined as {UserRealName} ";
+                    textBox32.Text = $"Logined as {A[0]} ";
 
                 }
                 else
@@ -304,12 +345,15 @@ namespace DB
                 sqlConnection);
             if(Int32.Parse(command.ExecuteScalar().ToString()) >= numericUpDown1.Value)
             {
+
+
+
                 command = new SqlCommand(
-                $"INSERT INTO SellChek (Unit_Id, Costumer_Id, Seller_Id, Quantity, Sell_numb) VALUES(N'{textBox30.Text}',N'1',N'{SellerID}',N'{numericUpDown1.Value}',N'{sellid_}')",
+                $"INSERT INTO SellChek (Unit_Id, Costumer_Id, Seller_Id, Quantity, Sell_numb, Date) VALUES(N'{textBox30.Text}',N'1',N'{SellerID}',N'{numericUpDown1.Value}',N'{sellid_}', N'{splitDatetoSql(dateTimePicker1.Value.ToString())}')",
                 sqlConnection);
                 command.ExecuteNonQuery();
 
-                update_Gird(dataGridView4, sqlConnection, $"SELECT Unit_name,sc.Quantity, SELL_Price FROM Units u, SellChek sc WHERE sc.Unit_Id = u.ID AND sc.Sell_numb = {sellid_}");
+                update_Gird(dataGridView4, sqlConnection, $"SELECT Unit_name,sc.Quantity, SELL_Price,sc.Quantity*u.SELL_Price AS 'Цена' FROM Units u, SellChek sc WHERE sc.Unit_Id = u.ID AND sc.Sell_numb = {sellid_}");
 
 
 
@@ -530,6 +574,44 @@ namespace DB
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             update_Gird(dataGridView5, sqlConnection, $"SELECT Surname, Telnum, Email FROM Costumers WHERE Surname LIKE N'%{textBox2.Text}%' OR Telnum LIKE N'%{textBox2.Text}%' OR Email LIKE N'%{textBox2.Text}%'");
+        }
+
+        private string splitDatetoSql(string A)
+        {
+            string T = A;
+            string[] pats = T.Split();
+            string[] a = pats[0].Split('.');
+            return (a[1] + '/' + a[0] + '/' + a[2]);
+        }
+
+        private void dateTimePicker2_ValueChanged(object sender, EventArgs e)
+        {
+            update_Gird(dataGridView7, sqlConnection, $"SELECT s.Name AS 'Имя', s.Surname AS 'Фамилия', SUM(s.Commision*sc.Quantity*(u.SELL_Price-u.BUY_Price)) AS 'Зарплата' FROM Sellers s JOIN SellChek sc ON s.ID = sc.Seller_Id JOIN Units u	ON sc.Unit_Id = u.ID WHERE DATEPART(m, sc.date) = DATEPART(m, N'{splitDatetoSql(dateTimePicker2.Value.ToString())}') AND DATEPART(yy, sc.date) = DATEPART(yy, N'{splitDatetoSql(dateTimePicker2.Value.ToString())}') GROUP BY s.Name,s.Surname");
+
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            update_Gird(dataGridView10, sqlConnection, "SELECT * FROM( SELECT  u.Unit_name AS 'Наименование', SUM(sc.Quantity * (u.SELL_Price - u.BUY_Price)) AS 'Доход' FROM Units u, SellChek sc WHERE sc.Unit_Id = u.ID GROUP BY u.Unit_name) b");
+            update_Gird(dataGridView11, sqlConnection, "SELECT u.Unit_name AS 'Наименование', u.Quantity AS 'Количество'  FROM Units u WHERE u.Quantity < 100");
+            update_Gird(dataGridView8, sqlConnection, "SELECT sc.Date, SUM(sc.Quantity*(u.SELL_Price-u.BUY_Price)) AS 'Доход' FROM SellChek sc LEFT JOIN Units u ON sc.Unit_Id =u.ID	GROUP BY sc.Date");
+            update_Gird(dataGridView9, sqlConnection, "SELECT DATENAME(m, sc.Date)+DATENAME(yy, sc.Date) , SUM(sc.Quantity * (u.SELL_Price - u.BUY_Price)) AS 'Доход' FROM SellChek sc LEFT JOIN Units u ON sc.Unit_Id = u.ID GROUP BY  DATENAME(m, sc.Date) + DATENAME(yy, sc.Date)");
+            update_Gird(dataGridView7, sqlConnection, $"SELECT s.Name AS 'Имя', s.Surname AS 'Фамилия', SUM(s.Commision*sc.Quantity*(u.SELL_Price-u.BUY_Price)) AS 'Зарплата' FROM Sellers s JOIN SellChek sc ON s.ID = sc.Seller_Id JOIN Units u	ON sc.Unit_Id = u.ID WHERE DATEPART(m, sc.date) = DATEPART(m, N'{splitDatetoSql(dateTimePicker2.Value.ToString())}') AND DATEPART(yy, sc.date) = DATEPART(yy, N'{splitDatetoSql(dateTimePicker2.Value.ToString())}') GROUP BY s.Name,s.Surname");
+            
+            SqlCommand command = new SqlCommand(
+            $"SELECT TOP(1) s.Surname AS 'имя', SUM(s.Commision * sc.Quantity * (u.SELL_Price - u.BUY_Price)) AS 'Зарплата' FROM Sellers s JOIN SellChek sc ON s.ID = sc.Seller_Id JOIN Units u ON sc.Unit_Id = u.ID GROUP BY s.Name,s.Surname",
+            sqlConnection);
+            textBox53.Text = command.ExecuteScalar().ToString();
+
+            command = new SqlCommand(
+            $"SELECT TOP(1) DATENAME(m, sc.Date)+DATENAME(yy, sc.Date) , SUM(sc.Quantity * (u.SELL_Price - u.BUY_Price)) AS 'Доход' FROM SellChek sc LEFT JOIN Units u ON sc.Unit_Id = u.ID GROUP BY  DATENAME(m, sc.Date) + DATENAME(yy, sc.Date)",
+            sqlConnection);
+            textBox56.Text = command.ExecuteScalar().ToString();
+
+            command = new SqlCommand(
+            $"SELECT TOP(1) sc.Date, SUM(sc.Quantity*(u.SELL_Price-u.BUY_Price)) AS 'Доход' FROM SellChek sc LEFT JOIN Units u ON sc.Unit_Id =u.ID	GROUP BY sc.Date  ORDER BY ~SUM(sc.Quantity*(u.SELL_Price-u.BUY_Price))",
+            sqlConnection);
+            textBox54.Text = command.ExecuteScalar().ToString();
         }
     }
 }
