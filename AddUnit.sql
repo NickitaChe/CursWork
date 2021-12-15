@@ -1,1 +1,0 @@
-﻿INSERT INTO Units VALUES (N'Мишка', N'Шт', 400, 600)
